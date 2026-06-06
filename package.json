@@ -13,7 +13,8 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
