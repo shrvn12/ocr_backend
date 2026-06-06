@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  REVIEWER
+  UPLOADER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  OCR_PROCESSING
+  OCR_FAILED
+  READY_FOR_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum AuditAction {
+  FIELD_CORRECTED
+  STATUS_CHANGED
+  DOCUMENT_APPROVED
+  DOCUMENT_REJECTED
+  OCR_COMPLETED
+  DOCUMENT_UPLOADED
+}
+
+// ─── Models ───────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  name         String
+  role         Role       @default(UPLOADER)
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  documents    Document[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  originalName    String         @map("original_name")
+  cloudinaryUrl   String         @map("cloudinary_url")
+  cloudinaryId    String         @map("cloudinary_id")
+  status          DocumentStatus @default(UPLOADED)
+  ocrRawText      String?        @map("ocr_raw_text") @db.Text
+  ocrProcessedAt  DateTime?      @map("ocr_processed_at")
+  reviewedAt      DateTime?      @map("reviewed_at")
+  reviewNotes     String?        @map("review_notes") @db.Text
+  uploadedById    String         @map("uploaded_by_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  uploadedBy      User            @relation(fields: [uploadedById], references: [id])
+  extractedFields ExtractedField[]
+  auditLogs       AuditLog[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([uploadedById])
+  @@map("documents")
+}
+
+model ExtractedField {
+  id              String   @id @default(cuid())
+  documentId      String   @map("document_id")
+  fieldName       String   @map("field_name")       // vehicle_number | weight | date
+  rawValue        String?  @map("raw_value")         // OCR-extracted value
+  correctedValue  String?  @map("corrected_value")   // Reviewer-corrected value
+  finalValue      String?  @map("final_value")       // Resolved final value
+  confidence      Float?                              // 0.0 – 1.0
+  isManuallySet   Boolean  @default(false) @map("is_manually_set")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  document        Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, fieldName])
+  @@index([documentId])
+  @@index([fieldName])
+  @@map("extracted_fields")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  documentId  String      @map("document_id")
+  userId      String      @map("user_id")
+  action      AuditAction
+  fieldName   String?     @map("field_name")
+  oldValue    String?     @map("old_value")
+  newValue    String?     @map("new_value")
+  metadata    Json?                           // Extra context (IP, reason, etc.)
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([documentId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -1,0 +1,7 @@
+node_modules/
+.env
+logs/
+*.log
+google-vision-key.json
+dist/
+.DS_Store
