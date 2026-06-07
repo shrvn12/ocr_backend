@@ -197,9 +197,9 @@ API_PREFIX=/api/v1
 
 # ── Database (Neon PostgreSQL) ─────────────────────────────
 # Pooled connection
-DATABASE_URL="postgresql://neondb_owner:npg_ctJDvs0p7YQE@ep-rough-dawn-aooearxi.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="db_url"
 # Direct connection
-DIRECT_URL="postgresql://neondb_owner:npg_ctJDvs0p7YQE@ep-rough-dawn-aooearxi.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+DIRECT_URL="db_url"
 
 # ── JWT ───────────────────────────────────────────────────
 JWT_SECRET=your_super_secret_jwt_key_min_32_chars
@@ -208,9 +208,9 @@ JWT_REFRESH_SECRET=your_refresh_secret_key_min_32_chars
 JWT_REFRESH_EXPIRES_IN=30d
 
 # ── Cloudinary ────────────────────────────────────────────
-CLOUDINARY_CLOUD_NAME=dh23n0vvf
-CLOUDINARY_API_KEY=372143977224935
-CLOUDINARY_API_SECRET=Cm-qQ4TLLSKprKjlBMG5LYQkTkQ
+CLOUDINARY_CLOUD_NAME=cloudname
+CLOUDINARY_API_KEY=1234567890
+CLOUDINARY_API_SECRET=apisecret123
 CLOUDINARY_UPLOAD_FOLDER=ocr-documents
 
 # ── Google Vision API ─────────────────────────────────────
